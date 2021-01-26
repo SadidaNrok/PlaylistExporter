@@ -14,6 +14,8 @@ public:
 //    ~MainWindow();
 
 private:
+    void open_fun();
+
     QPushButton* open_pl;
     QPushButton* save_pl;
     QPushButton* save_files;

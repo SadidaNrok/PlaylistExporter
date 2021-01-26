@@ -1,6 +1,11 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QLabel>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <fstream>
+#include <iostream>
+#include <codecvt>
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -54,6 +59,29 @@ MainWindow::MainWindow(QWidget *parent)
     move_down->setFixedSize({40, 40});
     move_down->setIcon(this->style()->standardIcon(QStyle::SP_ArrowDown));
     main_grid->addWidget(move_down, 3, 3, 1, 1);
+
+    connect(open_pl, &QPushButton::clicked, this, &MainWindow::open_fun);
+
 }
 
+void MainWindow::open_fun() {
+    auto path = QFileDialog::getOpenFileName(nullptr, "Open Playlist", "", "*.aimppl4");
+    std::wifstream file(path.toLocal8Bit().constData(),
+                        std::ios_base::in | std::ios_base::binary);
+    file.imbue(std::locale(file.getloc(), new std::codecvt_utf16<wchar_t,
+                           1114111UL, std::little_endian>));
+
+    if (!file.is_open()) {
+        QMessageBox::warning(this, "Warning", "File was not opened!");
+        return;
+    }
+
+    while (!file.eof()) {
+        std::wstring line;
+        std::getline(file, line);
+
+        std::wcout << line << std::endl;
+        playlist->addItem(QString::fromStdWString(line));
+    }
+}
 
