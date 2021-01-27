@@ -5,11 +5,11 @@
 
 class Song {
 public:
-    Song(std::wstring& str);
+    Song(const std::wstring& str);
 
     bool is_empty() { return empty; };
 
-    std::string path, name, artist, album;
+    std::wstring path, name, artist, album;
     int year, bit_rate, freq, duration, size;
 
 private:
