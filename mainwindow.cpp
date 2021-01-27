@@ -7,6 +7,7 @@
 #include <iostream>
 #include <codecvt>
 #include "mainwindow.h"
+#include "song.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
@@ -79,8 +80,9 @@ void MainWindow::open_fun() {
     while (!file.eof()) {
         std::wstring line;
         std::getline(file, line);
-
         std::wcout << line << std::endl;
+        Playlist play_list;
+        //play_list.push_back()
         playlist->addItem(QString::fromStdWString(line));
     }
 }
