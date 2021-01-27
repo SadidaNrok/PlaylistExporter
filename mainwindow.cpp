@@ -82,6 +82,10 @@ void MainWindow::open_fun() {
 
         std::wcout << line << std::endl;
         playlist->addItem(QString::fromStdWString(line));
+        
+        Song song(line);
+		if (!song.is_empty())
+			playlist.push_back(song);
     }
 }
 
