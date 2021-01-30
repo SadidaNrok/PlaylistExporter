@@ -3,19 +3,18 @@
 #include <string>
 #include <vector>
 #include <QTime>
+#include <QString>
+
 
 class Song {
 public:
     Song(const std::wstring& str);
 
-    bool is_empty() { 
-        return empty; 
-    };
+    bool is_empty() { return empty; };
 
-    std::wstring path, name, artist, album, ganre,
-                 year, bit_rate, chanels, freq, duration, size, number;
-
-    QTime dur;
+    QString path, name, artist, album, ganre, year;
+    int bit_rate, chanels, freq, size, number;
+    QTime duration;
 
 private:
     bool empty = true;

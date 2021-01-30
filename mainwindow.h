@@ -4,7 +4,23 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QListWidget>
+#include <QGridLayout>
+#include <QLabel>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QFont>
+#include <QTextStream>
+#include <QStatusBar>
+
+#include <fstream>
+#include <iostream>
+#include <codecvt>
+#include <cmath>
+#include <numeric>
+#include <functional>
+
 #include "song.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -16,6 +32,7 @@ public:
 
 private:
     void open_fun();
+    void save_files_fun();
     QString text_build(Song& song);
 
     QPushButton* open_pl;

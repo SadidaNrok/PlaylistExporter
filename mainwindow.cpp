@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto main_widget = new QWidget(this);
     setCentralWidget(main_widget);
+    statusBar()->showMessage("Ready");
 
     auto main_grid = new QGridLayout(main_widget);
 
@@ -55,11 +56,11 @@ MainWindow::MainWindow(QWidget *parent)
     main_grid->addWidget(move_down, 3, 3, 1, 1);
 
     connect(open_pl, &QPushButton::clicked, this, &MainWindow::open_fun);
-
+    connect(save_files, &QPushButton::clicked, this, &MainWindow::save_files_fun);
 }
 
 void MainWindow::open_fun() {
-    auto path = QFileDialog::getOpenFileName(nullptr, "Open Playlist", "", "*.aimppl4");
+    auto path = QFileDialog::getOpenFileName(nullptr, "Open Playlist", "", "Playlist files (*.aimppl4 *.PLC)");
     std::wifstream file(path.toLocal8Bit().constData(),
                         std::ios_base::in | std::ios_base::binary);
     file.imbue(std::locale(file.getloc(), new std::codecvt_utf16<wchar_t,
@@ -83,15 +84,26 @@ void MainWindow::open_fun() {
             list->addItem(qtext);
         }
     }
+
+    //auto total_size = accumulate(playlist.begin(), playlist.end(), 0);
+
+    statusBar()->showMessage("Playlist was loaded. Total size: %1");
+}
+
+void MainWindow::save_files_fun() {
+    auto path = QFileDialog::getExistingDirectory(nullptr, "Choose folder", "", QFileDialog::ShowDirsOnly);
+
 }
 
 QString MainWindow::text_build(Song& song) {
-    std::wstring text = song.number + L". " + song.artist +
-            L" - " + song.name;
-    QString qtext = QString::fromStdWString(text);
+    QString qtext = QString("%1. %2 - %3")
+            .arg(song.number, 2, 'g', -1, '0')
+            .arg(song.artist)
+            .arg(song.name);
+
     QFontMetrics qfm = QFontMetrics(list->font());
 
-    auto list_width = list->width() - 70;
+    auto list_width = list->width() - 40;
     bool chopped = false;
 
     while (qfm.width(qtext) > list_width) {
@@ -100,15 +112,13 @@ QString MainWindow::text_build(Song& song) {
     }
 
     if (chopped)
-        qtext += L"...";
+        qtext += "...";
 
-    qtext += L"\n" + song.freq + L" Hz, " + song.bit_rate + L" kbps "
-            + song.size + L" bits";
-
-
-    //std::cout << list_width << " - " << ii << std::endl;
-
-    //qtext += QString::fromStdWString(song.duration);
+    qtext += QString("\n%1 kHz, %2 kbps, %3 Mb, %4")
+            .arg(song.freq / 1000)
+            .arg(song.bit_rate)
+            .arg(song.size / (1024 * 1024.0), 3, 'f', 2, '0')
+            .arg(song.duration.toString("mm:ss"));
 
     return qtext;
 }
