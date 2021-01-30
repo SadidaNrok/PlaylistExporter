@@ -84,6 +84,10 @@ void MainWindow::open_fun() {
         Playlist play_list;
         //play_list.push_back()
         playlist->addItem(QString::fromStdWString(line));
+        
+        Song song(line);
+		if (!song.is_empty())
+			playlist.push_back(song);
     }
 }
 

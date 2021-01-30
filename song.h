@@ -5,15 +5,17 @@
 
 class Song {
 public:
-    Song(std::wstring& str);
+    Song(const std::wstring& str);
 
-    bool is_empty() { return empty; };
+    bool is_empty() { 
+        return empty; 
+    };
 
-    std::string path, name, artist, album;
-    int year, bit_rate, freq, duration, size;
+    std::wstring path, name, artist, album, ganre,
+                 year, bit_rate, chanels, freq, duration, size, number;
 
 private:
-    bool empty;
+    bool empty = true;
 };
 
 using Playlist = std::vector<Song>;
