@@ -1,13 +1,5 @@
-#include <QWidget>
-#include <QGridLayout>
-#include <QLabel>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <fstream>
-#include <iostream>
-#include <codecvt>
 #include "mainwindow.h"
-#include "song.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
@@ -40,8 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
     auto playlist_lbl = new QLabel("Playlist: ");
     main_grid->addWidget(playlist_lbl, 1, 0, 1, 6);
 
-    playlist = new QListWidget();
-    main_grid->addWidget(playlist, 2, 0, 1, 6);
+    list = new QListWidget();
+    list->setFont(QFont("Arial"));
+    main_grid->addWidget(list, 2, 0, 1, 6);
 
     add_file = new QPushButton("Add");
     add_file->setFixedSize({40, 40});
@@ -80,14 +73,42 @@ void MainWindow::open_fun() {
     while (!file.eof()) {
         std::wstring line;
         std::getline(file, line);
-        std::wcout << line << std::endl;
+
         Playlist play_list;
-        //play_list.push_back()
-        playlist->addItem(QString::fromStdWString(line));
         
         Song song(line);
-		if (!song.is_empty())
-			playlist.push_back(song);
+        if (!song.is_empty()) {
+            play_list.push_back(song);
+            auto qtext = text_build(song);
+            list->addItem(qtext);
+        }
     }
 }
 
+QString MainWindow::text_build(Song& song) {
+    std::wstring text = song.number + L". " + song.artist +
+            L" - " + song.name;
+    QString qtext = QString::fromStdWString(text);
+    QFontMetrics qfm = QFontMetrics(list->font());
+
+    auto list_width = list->width() - 70;
+    bool chopped = false;
+
+    while (qfm.width(qtext) > list_width) {
+        qtext.truncate(qtext.size() - 1);
+        chopped = true;
+    }
+
+    if (chopped)
+        qtext += L"...";
+
+    qtext += L"\n" + song.freq + L" Hz, " + song.bit_rate + L" kbps "
+            + song.size + L" bits";
+
+
+    //std::cout << list_width << " - " << ii << std::endl;
+
+    //qtext += QString::fromStdWString(song.duration);
+
+    return qtext;
+}

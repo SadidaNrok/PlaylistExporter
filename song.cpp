@@ -5,10 +5,9 @@ const size_t FIELDS_COUNT = 20;
 Song::Song(const std::wstring& str) {
     std::vector<int> marks;
 
-    for (size_t i = 0; i < str.size(); ++i) {
+    for (size_t i = 0; i < str.size(); ++i)
         if (str[i] == '|')
             marks.push_back(i);
-    }
 
     if (marks.size() == FIELDS_COUNT)
         empty = false;
@@ -35,4 +34,7 @@ Song::Song(const std::wstring& str) {
     //
     number = str.substr(marks[17] + 1, marks[18] - marks[17] - 1);
     //
+
+    auto hh = stoi(duration);
+    dur = QTime().addMSecs(hh);
 }

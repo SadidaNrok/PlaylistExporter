@@ -2,6 +2,7 @@
 #define SONG_H
 #include <string>
 #include <vector>
+#include <QTime>
 
 class Song {
 public:
@@ -13,6 +14,8 @@ public:
 
     std::wstring path, name, artist, album, ganre,
                  year, bit_rate, chanels, freq, duration, size, number;
+
+    QTime dur;
 
 private:
     bool empty = true;
