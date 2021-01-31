@@ -12,7 +12,7 @@ public:
 
     bool is_empty() { return empty; };
 
-    QString path, name, artist, album, ganre, year;
+    QString path, filename, extension, name, artist, album;
     int bit_rate, chanels, freq, size, number;
     QTime duration;
 

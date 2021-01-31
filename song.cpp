@@ -14,6 +14,8 @@ Song::Song(const std::wstring& str) {
     else return;
 
     path = QString::fromStdWString(str).mid(0, marks[0]);
+    filename = path.split("\\").last();
+    extension = path.split(".").last();
     name =QString::fromStdWString(str).mid(marks[0] + 1, marks[1] - marks[0] - 1);
     artist = QString::fromStdWString(str).mid(marks[1] + 1, marks[2] - marks[1] - 1);
     album = QString::fromStdWString(str).mid(marks[2] + 1, marks[3] - marks[2] - 1);
