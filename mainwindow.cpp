@@ -4,6 +4,13 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
 
+    auto m_quit = new QAction("&Quit");
+    auto m_settings = new QAction("&Settings");
+    QMenu* menu;
+    menu = menuBar()->addMenu("&File");
+    menu->addAction(m_quit);
+    menu->addAction(m_settings);
+
     auto main_widget = new QWidget(this);
     setCentralWidget(main_widget);
     statusBar()->showMessage("Ready");
@@ -23,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     btn_down = new QPushButton();
     sequence = new QCheckBox("Keep file sequence");
     btn_save = new QPushButton("Save");
+    progress = new QProgressBar();
 
     grid->addWidget(new QLabel("Source:"), 0, 0, 1, 5);
     grid->addWidget(le_open, 1, 0, 1, 5);
@@ -33,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     grid->addWidget(group, 4, 0, 1, 6);
     grid->addWidget(sequence, 5, 0, 1, 3);
     grid->addWidget(btn_save, 5, 5, 1, 1);
+    grid->addWidget(progress, 6, 0, 1, 6);
     grid->setRowStretch(4, 1);
 
     group->setLayout(group_grid);
@@ -45,7 +54,12 @@ MainWindow::MainWindow(QWidget *parent)
     le_open->setReadOnly(true);
     le_save_to->setReadOnly(true);
     group->setEnabled(false);
+    btn_add->setFixedSize({25, 25});
+    btn_delete->setFixedSize({25, 25});
+    btn_up->setFixedSize({25, 25});
+    btn_down->setFixedSize({25, 25});
     btn_save->setEnabled(false);
+    progress->setVisible(false);
 
 //    open_pl = new QPushButton();
 //    open_pl->setFixedSize({40, 40});
@@ -91,10 +105,13 @@ MainWindow::MainWindow(QWidget *parent)
 //    move_down->setFixedSize({40, 40});
 //    move_down->setIcon(this->style()->standardIcon(QStyle::SP_ArrowDown));
 //    main_grid->addWidget(move_down, 3, 3, 1, 1);
-
+    connect(m_quit, &QAction::triggered, qApp, &QApplication::quit);
     connect(btn_open, &QPushButton::clicked, this, &MainWindow::f_open);
     connect(btn_save_to, &QPushButton::clicked, this, &MainWindow::f_save_to);
     connect(btn_save, &QPushButton::clicked, this, &MainWindow::f_save);
+
+    total_size = 0;
+    total_dur = 0;
 }
 
 void MainWindow::f_open() {
@@ -118,19 +135,22 @@ void MainWindow::f_open() {
         Playlist play_list;
         
         Song song(line);
-        if (!song.is_empty()) {
+        if (!song.is_empty) {
             playlist.push_back(song);
             auto qtext = get_record(song);
             list->addItem(qtext);
+            total_size += song.size;
+            total_dur += song.duration;
         }
     }
 
-    //auto total_size = accumulate(playlist.begin(), playlist.end(), 0);
     if (!le_save_to->text().isEmpty())
         btn_save->setEnabled(true);
 
     group->setEnabled(true);
-    statusBar()->showMessage("Playlist was loaded. Total size: %1");
+    statusBar()->showMessage(QString("Playlist was loaded. Total size: %1 Mb, duration: %2")
+            .arg(total_size / (1024.0 * 1024), 3, 'f', 2, '0' )
+            .arg(QTime(0, 0, 0, 0).addMSecs(total_dur).toString("hh:mm:ss")));
 }
 
 void MainWindow::f_save_to() {
@@ -143,11 +163,34 @@ void MainWindow::f_save_to() {
 }
 
 void MainWindow::f_save() {
+    if (QMessageBox::question(nullptr, "Save files",
+        QString("Are you sure you want to copy all files to the folder: \n%1")
+            .arg(destination), QMessageBox::Cancel | QMessageBox::Yes)
+            == QMessageBox::Cancel)
+        return;
+
+    progress->setVisible(true);
+    int ready = 0;
+    int degree = total_size / 100;
+
     for (auto& song : playlist) {
         auto file = new QFile(song.path);
-        file->copy(destination + "\\" + song.filename);
+        int zeros = log10(playlist.size()) + 1;
+        if (sequence->isChecked())
+            file->copy(QString("%1\\%2-%3")
+                       .arg(destination)
+                       .arg(song.number, zeros, 'g', -1, '0')
+                       .arg(song.filename));
+        else
+            file->copy(QString("%1\\%3")
+                       .arg(destination)
+                       .arg(song.filename));
+
+        ready += song.size;
+        progress->setValue(ready / degree);
     }
 
+    progress->setVisible(false);
     statusBar()->showMessage("Files have been copied");
 }
 
@@ -175,7 +218,7 @@ QString MainWindow::get_record(Song& song) {
             .arg(song.freq / 1000)
             .arg(song.bit_rate)
             .arg(song.size / (1024 * 1024.0), 3, 'f', 2, '0')
-            .arg(song.duration.toString("mm:ss"));
+            .arg(QTime(0, 0, 0, 0).addMSecs(song.duration).toString("mm:ss"));
 
     return qtext;
 }

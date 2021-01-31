@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QApplication>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QListWidget>
@@ -15,6 +16,9 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QFile>
+#include <QProgressBar>
+#include <QMenu>
+#include <QMenuBar>
 
 #include <fstream>
 #include <iostream>
@@ -22,6 +26,7 @@
 #include <cmath>
 #include <numeric>
 #include <functional>
+//#include <imageres.dll.mun>
 
 #include "song.h"
 
@@ -51,9 +56,12 @@ private:
     QPushButton* btn_down;
     QCheckBox* sequence;
     QPushButton* btn_save;
+    QProgressBar* progress;
 
     Playlist playlist;
     QString source;
     QString destination;
+    unsigned int total_size;
+    unsigned int total_dur;
 };
 #endif // MAINWINDOW_H
