@@ -61,86 +61,39 @@ MainWindow::MainWindow(QWidget *parent)
     btn_save->setEnabled(false);
     progress->setVisible(false);
 
-//    open_pl = new QPushButton();
-//    open_pl->setFixedSize({40, 40});
-//    open_pl->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
-//    main_grid->addWidget(open_pl, 0, 0, 1, 1);
-
-//    save_pl =  new QPushButton();
-//    save_pl->setFixedSize({40, 40});
-//    save_pl->setIcon(this->style()->standardIcon(QStyle::SP_DialogSaveButton));
-//    main_grid->addWidget(save_pl, 0, 1, 1, 1);
-
-//    save_files = new QPushButton();
-//    save_files->setFixedSize({40, 40});
-//    save_files->setIcon(this->style()->standardIcon(QStyle::SP_DriveHDIcon));
-//    main_grid->addWidget(save_files, 0, 2, 1, 1);
-
-//    exit_app = new QPushButton();
-//    exit_app->setFixedSize({40, 40});
-//    exit_app->setIcon(this->style()->standardIcon(QStyle::SP_DialogCloseButton));
-//    main_grid->addWidget(exit_app, 0, 5, 1, 1);
-
-//    auto playlist_lbl = new QLabel("Playlist: ");
-//    main_grid->addWidget(playlist_lbl, 1, 0, 1, 6);
-
-//    list = new QListWidget();
-//    list->setFont(QFont("Arial"));
-//    main_grid->addWidget(list, 2, 0, 1, 6);
-
-//    add_file = new QPushButton("Add");
-//    add_file->setFixedSize({40, 40});
-//    main_grid->addWidget(add_file, 3, 0, 1, 1);
-
-//    delete_file = new QPushButton("Delete");
-//    delete_file->setFixedSize({40, 40});
-//    main_grid->addWidget(delete_file, 3, 1, 1, 1);
-
-//    move_up = new QPushButton();
-//    move_up->setFixedSize({40, 40});
-//    move_up->setIcon(this->style()->standardIcon(QStyle::SP_ArrowUp));
-//    main_grid->addWidget(move_up, 3, 2, 1, 1);
-
-//    move_down = new QPushButton();
-//    move_down->setFixedSize({40, 40});
-//    move_down->setIcon(this->style()->standardIcon(QStyle::SP_ArrowDown));
-//    main_grid->addWidget(move_down, 3, 3, 1, 1);
     connect(m_quit, &QAction::triggered, qApp, &QApplication::quit);
     connect(btn_open, &QPushButton::clicked, this, &MainWindow::f_open);
     connect(btn_save_to, &QPushButton::clicked, this, &MainWindow::f_save_to);
     connect(btn_save, &QPushButton::clicked, this, &MainWindow::f_save);
-
-    total_size = 0;
-    total_dur = 0;
 }
 
 void MainWindow::f_open() {
-    auto path = QFileDialog::getOpenFileName(nullptr, "Open Playlist", "", "Playlist files (*.aimppl4 *.PLC)");
-    source = path;
-    le_open->setText(path);
-    std::wifstream file(path.toLocal8Bit().constData(),
-                        std::ios_base::in | std::ios_base::binary);
-    file.imbue(std::locale(file.getloc(), new std::codecvt_utf16<wchar_t,
-                           1114111UL, std::little_endian>));
+    auto path = QFileDialog::getOpenFileName(nullptr,
+                "Open Playlist", "", "Playlist files (*.aimppl4 *.PLC)");
 
-    if (!file.is_open()) {
+    auto file = new QFile(path);
+    if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::warning(this, "Warning", "File was not opened!");
         return;
     }
 
-    while (!file.eof()) {
-        std::wstring line;
-        std::getline(file, line);
+    QTextStream in(file);
+    in.setCodec("UTF-16");
 
-        Playlist play_list;
-        
+    playlist = Playlist(file);
+    le_open->setText(path);
+
+    while (!in.atEnd()) {
+        QString line;
+        line = in.readLine();
+
         Song song(line);
         if (!song.is_empty) {
-            playlist.push_back(song);
+            playlist.add(song);
             auto qtext = get_record(song);
             list->addItem(qtext);
-            total_size += song.size;
-            total_dur += song.duration;
+            playlist.size += song.size;
+            playlist.duration += song.duration;
         }
     }
 
@@ -149,8 +102,8 @@ void MainWindow::f_open() {
 
     group->setEnabled(true);
     statusBar()->showMessage(QString("Playlist was loaded. Total size: %1 Mb, duration: %2")
-            .arg(total_size / (1024.0 * 1024), 3, 'f', 2, '0' )
-            .arg(QTime(0, 0, 0, 0).addMSecs(total_dur).toString("hh:mm:ss")));
+            .arg(playlist.size / (1024.0 * 1024), 3, 'f', 2, '0' )
+            .arg(QTime(0, 0, 0, 0).addMSecs(playlist.duration).toString("hh:mm:ss")));
 }
 
 void MainWindow::f_save_to() {
@@ -171,20 +124,28 @@ void MainWindow::f_save() {
 
     progress->setVisible(true);
     int ready = 0;
-    int degree = total_size / 100;
+    int degree = playlist.size / 100;
 
     for (auto& song : playlist) {
         auto file = new QFile(song.path);
-        int zeros = log10(playlist.size()) + 1;
+        int zeros = log10(playlist.count()) + 1;
+        bool copied = false;
+
         if (sequence->isChecked())
-            file->copy(QString("%1\\%2-%3")
+            copied = file->copy(QString("%1\\%2-%3")
                        .arg(destination)
                        .arg(song.number, zeros, 'g', -1, '0')
                        .arg(song.filename));
         else
-            file->copy(QString("%1\\%3")
+            copied = file->copy(QString("%1\\%3")
                        .arg(destination)
                        .arg(song.filename));
+
+        if (!copied) {
+            QMessageBox::warning(this, "Warning", "File was not copied!");
+            progress->setVisible(false);
+            return;
+        }
 
         ready += song.size;
         progress->setValue(ready / degree);

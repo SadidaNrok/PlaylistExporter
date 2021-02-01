@@ -15,7 +15,6 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QGroupBox>
-#include <QFile>
 #include <QProgressBar>
 #include <QMenu>
 #include <QMenuBar>
@@ -28,7 +27,7 @@
 #include <functional>
 //#include <imageres.dll.mun>
 
-#include "song.h"
+#include "playlist.h"
 
 
 class MainWindow : public QMainWindow
@@ -59,9 +58,9 @@ private:
     QProgressBar* progress;
 
     Playlist playlist;
-    QString source;
+    //QString source;
     QString destination;
-    unsigned int total_size;
-    unsigned int total_dur;
+    //unsigned int total_size;
+    //unsigned int total_dur;
 };
 #endif // MAINWINDOW_H

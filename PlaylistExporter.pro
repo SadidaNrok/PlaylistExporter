@@ -11,10 +11,12 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    playlist.cpp \
     song.cpp
 
 HEADERS += \
     mainwindow.h \
+    playlist.h \
     song.h
 
 # Default rules for deployment.
