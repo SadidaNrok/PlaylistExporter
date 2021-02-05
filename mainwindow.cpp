@@ -24,10 +24,10 @@ MainWindow::MainWindow(QWidget *parent)
     group = new QGroupBox("Playlist items:");
     auto group_grid = new QGridLayout();
     list = new QListWidget();
-    btn_add = new QPushButton();
-    btn_delete = new QPushButton();
-    btn_up = new QPushButton();
-    btn_down = new QPushButton();
+    btn_add = new QPushButton("+");
+    btn_delete = new QPushButton("-");
+    btn_up = new QPushButton("U");
+    btn_down = new QPushButton("D");
     sequence = new QCheckBox("Keep file sequence");
     btn_save = new QPushButton("Save");
     progress = new QProgressBar();
@@ -65,12 +65,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btn_open, &QPushButton::clicked, this, &MainWindow::f_open);
     connect(btn_save_to, &QPushButton::clicked, this, &MainWindow::f_save_to);
     connect(btn_save, &QPushButton::clicked, this, &MainWindow::f_save);
+    connect(btn_delete, &QPushButton::clicked, this, &MainWindow::f_delete);
+    connect(btn_up, &QPushButton::clicked, this, &MainWindow::f_up);
+    connect(btn_down, &QPushButton::clicked, this, &MainWindow::f_down);
 }
 
 void MainWindow::f_open() {
     auto path = QFileDialog::getOpenFileName(nullptr,
                 "Open Playlist", "", "Playlist files (*.aimppl4 *.PLC)");
-
     auto file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::warning(this, "Warning", "File was not opened!");
@@ -88,17 +90,30 @@ void MainWindow::f_open() {
         line = in.readLine();
 
         Song song(line);
+
+
         if (!song.is_empty) {
             playlist.add(song);
-            auto qtext = get_record(song);
-            list->addItem(qtext);
+
+            //Widget instead QListWidgetItem
+            //auto qtext = get_record(song);
+            //list->addItem(qtext);
+            auto itm = new QListWidgetItem(list);
+            //itm->setText(qtext);
+            itm->setSizeHint(QSize(250, 40));
+            list->setItemWidget(itm, song.wid);
+
             playlist.size += song.size;
             playlist.duration += song.duration;
         }
     }
 
-    if (!le_save_to->text().isEmpty())
+    if (le_save_to->text().isEmpty()) {
         btn_save->setEnabled(true);
+        le_save_to->setText(playlist.path);
+    }
+
+    file->close();
 
     group->setEnabled(true);
     statusBar()->showMessage(QString("Playlist was loaded. Total size: %1 Mb, duration: %2")
@@ -130,6 +145,7 @@ void MainWindow::f_save() {
         auto file = new QFile(song.path);
         int zeros = log10(playlist.count()) + 1;
         bool copied = false;
+        bool deleteble = false;
 
         if (sequence->isChecked())
             copied = file->copy(QString("%1\\%2-%3")
@@ -142,9 +158,16 @@ void MainWindow::f_save() {
                        .arg(song.filename));
 
         if (!copied) {
-            QMessageBox::warning(this, "Warning", "File was not copied!");
-            progress->setVisible(false);
-            return;
+            if (!deleteble) {
+                deleteble = QMessageBox::question(nullptr, "Warning",
+                                      "Perhaps files with the names of the copied"
+                                      " files already exist in the destination folder"
+                                      "\nOverwrite these files?",
+                                      QMessageBox::Yes | QMessageBox::Cancel);
+                //QMessageBox::warning(this, "Warning", "File was not copied!");
+                progress->setVisible(false);
+                return;
+            }
         }
 
         ready += song.size;
@@ -155,6 +178,48 @@ void MainWindow::f_save() {
     statusBar()->showMessage("Files have been copied");
 }
 
+void MainWindow::f_delete() {
+    playlist.remove(list->currentRow());
+    delete list->takeItem(list->currentRow());
+}
+
+void MainWindow::f_up() {
+    auto row = list->currentRow();
+    if (row == 0)
+        return;
+
+    std::swap(playlist[row], playlist[row - 1]);
+
+    auto item = list->currentItem();
+    delete list->itemWidget(item);
+    list->takeItem(row);
+    list->insertItem(row - 1, item);
+    list->setCurrentItem(item);
+
+    auto wid = new SongWidget(&playlist[row - 1]);
+    playlist[row - 1].wid = wid;
+    list->setItemWidget(item, wid);
+}
+
+void MainWindow::f_down() {
+    auto row = list->currentRow();
+    if (row == list->count() - 1)
+        return;
+
+    std::swap(playlist[row], playlist[row + 1]);
+
+    auto item = list->currentItem();
+    delete list->itemWidget(item);
+    list->takeItem(row);
+    list->insertItem(row + 1, item);
+    list->setCurrentItem(item);
+
+    auto wid = new SongWidget(&playlist[row + 1]);
+    playlist[row + 1].wid = wid;
+    list->setItemWidget(item, wid);
+}
+
+//Delete this function
 QString MainWindow::get_record(Song& song) {
     QString qtext = QString("%1. %2 - %3")
             .arg(song.number, 2, 'g', -1, '0')

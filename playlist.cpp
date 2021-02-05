@@ -2,9 +2,9 @@
 
 Playlist::Playlist(QFile* file) {
     if (file != nullptr) {
-        path = file->fileName();
-        filename = file->fileName().split('\\').last();
+        filename = file->fileName().split('/').last();
         extension = file->fileName().split('.').last();
+        path = file->fileName().left(file->fileName().length()-filename.length() - 1);
     }
     size = 0;
     duration = 0;
@@ -17,6 +17,10 @@ Song& Playlist::operator[] (int ind) {
 
 void Playlist::add(const Song& song) {
     data.push_back(song);
+}
+
+void Playlist::remove(int ind) {
+    data.remove(ind);
 }
 
 QVector<Song>::const_iterator Playlist::begin() {

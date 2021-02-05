@@ -18,17 +18,17 @@
 #include <QProgressBar>
 #include <QMenu>
 #include <QMenuBar>
+#include <QUrl>
+#include <QFileInfo>
 
-#include <fstream>
-#include <iostream>
-#include <codecvt>
 #include <cmath>
-#include <numeric>
-#include <functional>
-//#include <imageres.dll.mun>
 
 #include "playlist.h"
 
+#include <QtMultimedia>
+#include <QtMultimediaWidgets>
+#include <QMediaMetaData>
+#include <QMediaObject>
 
 class MainWindow : public QMainWindow
 {
@@ -41,6 +41,10 @@ private:
     void f_open();
     void f_save_to();
     void f_save();
+    void f_add();
+    void f_delete();
+    void f_up();
+    void f_down();
     QString get_record(Song& song);
 
     QLineEdit* le_open;
@@ -58,9 +62,6 @@ private:
     QProgressBar* progress;
 
     Playlist playlist;
-    //QString source;
     QString destination;
-    //unsigned int total_size;
-    //unsigned int total_dur;
 };
 #endif // MAINWINDOW_H

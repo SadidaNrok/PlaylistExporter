@@ -9,6 +9,7 @@ public:
     Playlist(QFile* file = nullptr);
     Song& operator[] (int ind);
     void add(const Song& song);
+    void remove(int);
     QVector<Song>::const_iterator begin();
     QVector<Song>::const_iterator end();
     size_t count();
