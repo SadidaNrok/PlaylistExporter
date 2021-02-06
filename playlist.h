@@ -1,27 +1,22 @@
 #ifndef PLAYLIST_H
 #define PLAYLIST_H
-#include <song.h>
+#include "song.h"
+
 #include <QVector>
 #include <QFile>
+#include <QTextStream>
 
-class Playlist {
+class Playlist : public QVector<Song> {
 public:
     Playlist(QFile* file = nullptr);
-    Song& operator[] (int ind);
     void add(const Song& song);
-    void remove(int);
-    QVector<Song>::const_iterator begin();
-    QVector<Song>::const_iterator end();
-    size_t count();
+    void del(int ind);
 
     QString path;
     QString filename;
     QString extension;
-    int size;
+    int full_size;
     int duration;
-
-private:
-    QVector<Song> data;
 };
 
 #endif // PLAYLIST_H

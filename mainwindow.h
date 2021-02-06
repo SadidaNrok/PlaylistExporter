@@ -10,7 +10,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFont>
-#include <QTextStream>
 #include <QStatusBar>
 #include <QCheckBox>
 #include <QLineEdit>
@@ -18,17 +17,17 @@
 #include <QProgressBar>
 #include <QMenu>
 #include <QMenuBar>
-#include <QUrl>
-#include <QFileInfo>
+//#include <QUrl>
+//#include <QFileInfo>
 
-#include <cmath>
+//#include <cmath>
 
 #include "playlist.h"
-
-#include <QtMultimedia>
-#include <QtMultimediaWidgets>
-#include <QMediaMetaData>
-#include <QMediaObject>
+//#include <QSound>
+//#include <QtMultimedia>
+//#include <QtMultimediaWidgets>
+//#include <QMediaMetaData>
+//#include <QMediaObject>
 
 class MainWindow : public QMainWindow
 {
@@ -45,7 +44,9 @@ private:
     void f_delete();
     void f_up();
     void f_down();
-    QString get_record(Song& song);
+    void f_show_message();
+    //void f_list_changed(QModelIndexList*);
+    //QString get_record(Song&);
 
     QLineEdit* le_open;
     QLineEdit* le_save_to;

@@ -7,23 +7,22 @@
 #include <QLabel>
 #include <QLayout>
 
-
-class SongWidget;
+//class SongWidget;
 
 class Song {
 public:
-    Song(const QString& str);
+    Song(const QString&);
 
     QString path, filename, extension, name, artist, album;
-    unsigned int bit_rate, freq, duration, size, number;
+    unsigned int bit_rate, freq, duration, size;
     bool is_empty = true;
 
-    SongWidget* wid;
+    //SongWidget* wid;
 };
 
 class SongWidget : public QWidget {
 public:
-    SongWidget(Song* song);
+    SongWidget(const Song&, int);
 
     QLabel* number;
     QLabel* top;
