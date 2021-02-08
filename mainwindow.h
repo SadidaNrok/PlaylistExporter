@@ -17,17 +17,11 @@
 #include <QProgressBar>
 #include <QMenu>
 #include <QMenuBar>
-//#include <QUrl>
-//#include <QFileInfo>
 
-//#include <cmath>
+#include <cmath>
 
 #include "playlist.h"
-//#include <QSound>
-//#include <QtMultimedia>
-//#include <QtMultimediaWidgets>
-//#include <QMediaMetaData>
-//#include <QMediaObject>
+#include "playlistwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -45,21 +39,19 @@ private:
     void f_up();
     void f_down();
     void f_show_message();
-    //void f_list_changed(QModelIndexList*);
-    //QString get_record(Song&);
 
     QLineEdit* le_open;
     QLineEdit* le_save_to;
     QPushButton* btn_open;
-    QPushButton* btn_save_to;
+    QPushButton* btn_copy_to;
     QGroupBox* group;
-    QListWidget* list;
+    PlaylistWidget* list;
     QPushButton* btn_add;
     QPushButton* btn_delete;
     QPushButton* btn_up;
     QPushButton* btn_down;
     QCheckBox* sequence;
-    QPushButton* btn_save;
+    QPushButton* btn_copy;
     QProgressBar* progress;
 
     Playlist playlist;

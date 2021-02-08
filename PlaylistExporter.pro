@@ -12,11 +12,13 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     playlist.cpp \
+    playlistwidget.cpp \
     song.cpp
 
 HEADERS += \
     mainwindow.h \
     playlist.h \
+    playlistwidget.h \
     song.h
 
 # Default rules for deployment.

@@ -3,14 +3,14 @@
 #include "song.h"
 
 #include <QVector>
-#include <QFile>
 #include <QTextStream>
 
 class Playlist : public QVector<Song> {
 public:
     Playlist(QFile* file = nullptr);
-    void add(const Song& song);
-    void del(int ind);
+    void add(const Song&);
+    void del(int);
+    void paste(int, const Song&);
 
     QString path;
     QString filename;

@@ -1,5 +1,10 @@
 #include "song.h"
 
+Song::Song() {
+    duration = 0;
+    size = 0;
+}
+
 Song::Song(const QString& str) {
     auto list = str.split('|');
 
@@ -11,15 +16,21 @@ Song::Song(const QString& str) {
     extension = path.split('.').last();
     name = list[1];
     artist = list[2];
-    album = list[3];
     bit_rate = list[11].toUInt();
     freq = list[13].toUInt();
     duration = list[14].toUInt();
     size = list[15].toUInt();
-    //number = list[18].toUInt() + 1;
     is_empty = false;
+}
 
-    //wid = new SongWidget(*this, num);
+Song::Song(QFile* file) {
+    path = file->fileName();
+    filename = path.split('/').last();
+    extension = path.split('.').last();
+
+    duration = 0;
+    size = file->size();
+    is_empty = false;
 }
 
 SongWidget::SongWidget(const Song& song, int num) {
@@ -47,7 +58,10 @@ SongWidget::SongWidget(const Song& song, int num) {
     setLayout(vgrid);
 
     number->setText(QString::number(num));
-    top->setText(song.artist + " - " + song.name);
+    if (song.name.isEmpty() || song.artist.isEmpty())
+        top->setText(song.filename);
+    else
+        top->setText(song.artist + " - " + song.name);
     bottom->setText(QString("%1 :: %2 kHz, %3 kbps, %4 Mb")
                          .arg(song.extension)
                          .arg(song.freq / 1000)

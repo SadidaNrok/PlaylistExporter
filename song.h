@@ -6,18 +6,17 @@
 #include <QWidget>
 #include <QLabel>
 #include <QLayout>
-
-//class SongWidget;
+#include <QFile>
 
 class Song {
 public:
+    Song();
     Song(const QString&);
+    Song(QFile*);
 
-    QString path, filename, extension, name, artist, album;
+    QString path, filename, extension, name, artist;
     unsigned int bit_rate, freq, duration, size;
     bool is_empty = true;
-
-    //SongWidget* wid;
 };
 
 class SongWidget : public QWidget {

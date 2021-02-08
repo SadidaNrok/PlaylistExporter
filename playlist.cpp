@@ -32,3 +32,9 @@ void Playlist::del(int ind) {
     duration -= at(ind).duration;
     remove(ind);
 }
+
+void Playlist::paste(int ind, const Song& song) {
+    insert(ind, song);
+    full_size += song.size;
+    duration += song.duration;
+}
