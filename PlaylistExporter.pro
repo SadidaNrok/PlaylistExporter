@@ -31,3 +31,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 #DISTFILES += \
  #   main.qml
 #QT += multimedia multimediawidgets phonon
+QT += multimedia

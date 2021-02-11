@@ -17,6 +17,7 @@ public:
     QString path, filename, extension, name, artist;
     unsigned int bit_rate, freq, duration, size;
     bool is_empty = true;
+    bool is_exist = false;
 };
 
 class SongWidget : public QWidget {

@@ -3,7 +3,7 @@
 Playlist::Playlist(QFile* file) {
     if (file != nullptr) {
         QString f_name = file->fileName();
-        filename = f_name.split('\\').last();
+        filename = f_name.split('/').last();
         extension = f_name.split('.').last();
         path = f_name.left(f_name.length() - filename.length() - 1);
     }

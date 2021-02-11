@@ -1,4 +1,5 @@
 #include "song.h"
+#include <QPainter>
 
 Song::Song() {
     duration = 0;
@@ -21,6 +22,7 @@ Song::Song(const QString& str) {
     duration = list[14].toUInt();
     size = list[15].toUInt();
     is_empty = false;
+    is_exist = (QFile(path).exists() ? true : false);
 }
 
 Song::Song(QFile* file) {
@@ -39,9 +41,19 @@ SongWidget::SongWidget(const Song& song, int num) {
     bottom = new QLabel;
     duration = new QLabel;
 
+    if (!song.is_exist) {
+        number->setStyleSheet("QLabel { color : red; }");
+        top->setStyleSheet("QLabel { color : red; }");
+        bottom->setStyleSheet("QLabel { color : red; }");
+        duration->setStyleSheet("QLabel { color : red; }");
+    }
+
+    QFont font;
+    font.setPixelSize(9);
+
     number->setFixedWidth(20);
     duration->setFixedWidth(28);
-    bottom->setFont(QFont("Arial", 6));
+    bottom->setFont(font);
 
     auto hgrid = new QHBoxLayout;
     auto vgrid = new QVBoxLayout;

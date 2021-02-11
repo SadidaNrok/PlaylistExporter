@@ -1,6 +1,7 @@
 #include "playlistwidget.h"
 
-PlaylistWidget::PlaylistWidget() {}
+PlaylistWidget::PlaylistWidget(QMainWindow* prnt)
+    : QListWidget(prnt) {}
 
 void PlaylistWidget::addSong (const Song& song) {
     auto item = createItem(this);

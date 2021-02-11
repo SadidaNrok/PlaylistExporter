@@ -17,6 +17,8 @@
 #include <QProgressBar>
 #include <QMenu>
 #include <QMenuBar>
+#include <QThread>
+#include <QStorageInfo>
 
 #include <cmath>
 
@@ -32,8 +34,8 @@ public:
 
 private:
     void f_open();
-    void f_save_to();
-    void f_save();
+    void f_copy_to();
+    void f_copy();
     void f_add();
     void f_delete();
     void f_up();

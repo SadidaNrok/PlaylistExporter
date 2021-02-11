@@ -2,6 +2,7 @@
 #define PLAYLISTWIDGET_H
 
 #include <QListWidget>
+#include <QMainWindow>
 #include <QVector>
 #include "song.h"
 
@@ -9,7 +10,7 @@ class PlaylistWidget : public QListWidget {
     Q_OBJECT
 
 public:
-    PlaylistWidget();
+    PlaylistWidget(QMainWindow* = nullptr);
     void addSong (const Song&);
     void insertSong (int, const Song&);
     void deleteSong (int);

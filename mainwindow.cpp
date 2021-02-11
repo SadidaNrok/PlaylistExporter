@@ -16,20 +16,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto grid = new QGridLayout(main_widget);
 
-    le_open = new QLineEdit();
-    le_save_to = new QLineEdit();
-    btn_open = new QPushButton(tr("&Open"));
-    btn_copy_to = new QPushButton(tr("Copy &to"));
-    group = new QGroupBox(tr("Playlist items:"));
-    auto group_grid = new QGridLayout();
-    list = new PlaylistWidget();
-    btn_add = new QPushButton("+");
-    btn_delete = new QPushButton("-");
-    btn_up = new QPushButton("U");
-    btn_down = new QPushButton("D");
-    sequence = new QCheckBox(tr("Keep file sequence"));
-    btn_copy = new QPushButton(tr("&Copy"));
-    progress = new QProgressBar();
+    le_open = new QLineEdit(this);
+    le_save_to = new QLineEdit(this);
+    btn_open = new QPushButton(tr("&Open"), this);
+    btn_copy_to = new QPushButton(tr("Copy &to"), this);
+    group = new QGroupBox(tr("Playlist tracks:"), this);
+    auto group_grid = new QGridLayout(this);
+    list = new PlaylistWidget(this);
+    btn_add = new QPushButton("&+", this);
+    btn_delete = new QPushButton("&-", this);
+    btn_up = new QPushButton("&U", this);
+    btn_down = new QPushButton("&D", this);
+    sequence = new QCheckBox(tr("&Keep file sequence"), this);
+    btn_copy = new QPushButton(tr("&Copy"), this);
+    progress = new QProgressBar(this);
 
     grid->addWidget(new QLabel(tr("Source:")), 0, 0, 1, 5);
     grid->addWidget(le_open, 1, 0, 1, 5);
@@ -63,12 +63,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_quit, &QAction::triggered, qApp, &QApplication::quit);
     connect(btn_open, &QPushButton::clicked, this, &MainWindow::f_open);
-    connect(btn_copy_to, &QPushButton::clicked, this, &MainWindow::f_save_to);
+    connect(btn_copy_to, &QPushButton::clicked, this, &MainWindow::f_copy_to);
     connect(btn_add, &QPushButton::clicked, this, &MainWindow::f_add);
     connect(btn_delete, &QPushButton::clicked, this, &MainWindow::f_delete);
     connect(btn_up, &QPushButton::clicked, this, &MainWindow::f_up);
     connect(btn_down, &QPushButton::clicked, this, &MainWindow::f_down);
-    connect(btn_copy, &QPushButton::clicked, this, &MainWindow::f_save);
+    connect(btn_copy, &QPushButton::clicked, this, &MainWindow::f_copy);
 }
 
 void MainWindow::f_open() {
@@ -79,9 +79,11 @@ void MainWindow::f_open() {
         QMessageBox::warning(this, tr("Warning"), tr("File was not opened!"));
         return;
     }
+    list->clear();
 
     playlist = Playlist(file);
-    le_open->setText(path);
+    destination = playlist.path;
+    le_open->setText(playlist.filename);
 
     for (const auto& song : playlist)
         list->addSong(song);
@@ -97,17 +99,24 @@ void MainWindow::f_open() {
     f_show_message();
 }
 
-void MainWindow::f_save_to() {
+void MainWindow::f_copy_to() {
     auto path = QFileDialog::getExistingDirectory(nullptr, tr("Choose folder"), "",
                                                   QFileDialog::ShowDirsOnly);
+    if (path.isEmpty())
+        return;
+
     destination = path;
     le_save_to->setText(path);
 
     if (!le_open->text().isEmpty())
         btn_copy->setEnabled(true);
+
+    auto storage = QStorageInfo();
+    storage.setPath(path);
+    f_show_message();
 }
 
-void MainWindow::f_save() {
+void MainWindow::f_copy() {
     if (QMessageBox::question(nullptr, tr("Save files"),
         QString(tr("Are you sure you want to copy all files to the folder: \n%1"))
             .arg(destination), QMessageBox::Cancel | QMessageBox::Yes)
@@ -115,18 +124,22 @@ void MainWindow::f_save() {
         return;
 
     progress->setValue(0);
+    progress->setMaximum(playlist.full_size);
     progress->setVisible(true);
-    int ready = 0;
-    int degree = playlist.full_size / 100;
+
     int zeros = log10(playlist.count()) + 1;
     int num = 1;
 
     auto answer = QMessageBox::No;
     for (const auto& song : playlist) {
+        if (!song.is_exist)
+            continue;
+
         auto file = new QFile(song.path);
 
         bool copied = false;
         QString new_filename;
+
         if (sequence->isChecked())
             new_filename = QString("%1\\%2-%3")
                            .arg(destination)
@@ -159,8 +172,7 @@ void MainWindow::f_save() {
                 }
             }
         }
-        ready += song.size;
-        progress->setValue(ready / degree);
+        progress->setValue(progress->value() + song.size);
         ++num;
     }
     progress->setVisible(false);
@@ -217,7 +229,10 @@ void MainWindow::f_down() {
 }
 
 void MainWindow::f_show_message() {
-    statusBar()->showMessage(QString(tr("The size of the loaded playlist: %1 Mb, duration: %2"))
+    auto storage = QStorageInfo();
+    storage.setPath(destination);
+    statusBar()->showMessage(QString(tr("Disk space: %1 Gb. Playlist: %2 Mb, duration: %3"))
+            .arg(storage.bytesAvailable() / 1024 / 1024 / 1024.0, 3, 'f', 2, '0')
             .arg(playlist.full_size / (1024.0 * 1024), 3, 'f', 2, '0' )
             .arg(QTime(0, 0, 0, 0).addMSecs(playlist.duration).toString("hh:mm:ss")));
 }
